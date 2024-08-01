@@ -13,10 +13,10 @@ Assuming you wish to only buy new assets without selling existing ones, you can
 use `purchase.pl` to help bring your portfolio as close as possible to your
 target portfolio.
 
-1. Enter your target asset allocations in `purchase.pl`.
-1. Enter your actual asset holdings in `purchase.pl`.
+1. Enter your target asset allocations in `target.csv`.
+1. Enter your actual asset holdings in `holdings.csv`.
 1. Enter the total amount you want to invest this month (we assume monthly
-   investing).
+   investing) in `purchase.pl`.
 1. Run the `purchase.pl` script. It will let you know what assets to buy this
    month in order to bring your portfolio closest to your target portfolio.
 
@@ -26,10 +26,10 @@ Assuming you wish to rebalance your portfolio completely, including both
 selling and buying assets, you can use `rebalance.pl` to bring your portfolio
 exactly in line with your target portfolio.
 
-1. Enter your target asset allocations in `rebalance.pl`.
-1. Enter your actual asset holdings in `rebalance.pl`.
+1. Enter your target asset allocations in `target.csv`.
+1. Enter your actual asset holdings in `holdings.csv`.
 1. Enter the total amount you want to invest during this investment period
    (this can be zero if you don't wish to invest more money during
-   rebalancing).
+   rebalancing) in `rebalance.pl`.
 1. Run the `rebalance.pl` script. It will let you know what assets to buy and
     sell in order to make your portfolio match your target portfolio.
