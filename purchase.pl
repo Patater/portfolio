@@ -20,10 +20,12 @@ sub allocate_funds {
 
     # Calculate the total value of the portfolio.
     my $total_value = sum values %$portfolio;
+    my $new_total = $total_value + $monthly_investment;
 
-    # Calculate the current asset allocations.
+    # Calculate the current asset allocations accounting for the new
+    # investment.
     my %current_allocation =
-      map { $_ => $portfolio->{$_} / $total_value }
+      map { $_ => $portfolio->{$_} / $new_total }
       keys %$portfolio;
 
     # Calculate the deviation from target.
@@ -35,11 +37,19 @@ sub allocate_funds {
     my %underrepresented = map { $_ => $deviation{$_} }
       grep { $deviation{$_} > 0 } keys %deviation;
 
-    # Allocate the funds proportionally.
+    # Allocate the funds proportionally according to their distance from
+    # target. Limit the new investment in the deviation to ensure that if, for
+    # example, the monthly investment is large, the underrepresented funds
+    # don't become over represented.
     my $total_deviation = sum values %underrepresented;
-    my %adjustments =
-      map { $_ => ($deviation{$_} / $total_deviation) * $monthly_investment }
-      keys %underrepresented;
+    sub cap { $_[0] > $_[1] ? $_[1] : $_[0] }
+    my %adjustments = map {
+        $_ => cap(($deviation{$_} / $total_deviation) * $monthly_investment,
+            $deviation{$_} * $new_total)
+    } keys %underrepresented;
+
+    my %purchases = map { $_ => $adjustments{$_} }
+      grep { $adjustments{$_} > 0 } keys %adjustments;
 
     # Update the portfolio with the investments.
     @$portfolio{keys %adjustments} =
