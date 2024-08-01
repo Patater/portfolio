@@ -61,6 +61,13 @@ sub allocate_funds {
 
 sub main {
     my $target_allocation = read_csv('target.csv', 'Symbol', 'Ratio');
+
+    # Verify target allocations sum to about 1 (within an epsilon)
+    my $whole = sum values %$target_allocation;
+    if ($whole - 1e-4 > 1.0) {
+        die "Target allocation does not sum to 1";
+    }
+
     my $actual_portfolio = read_csv('holdings.csv', 'Symbol', 'Amount');
     my $monthly_investment = 10000;
 
