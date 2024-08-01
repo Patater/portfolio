@@ -9,9 +9,10 @@ package PortfolioUtils;
 use strict;
 use warnings;
 use List::Util qw(sum);
+use Text::CSV qw(csv);
 use Exporter qw(import);
 
-our @EXPORT_OK = qw(print_adjustments print_portfolio);
+our @EXPORT_OK = qw(print_adjustments print_portfolio read_csv);
 
 # Print the buy/sell adjustments
 sub print_adjustments {
@@ -40,6 +41,19 @@ sub print_portfolio {
 
         print ")\n";
     }
+}
+
+# Read a hash from two columns of a CSV file
+sub read_csv {
+    my ($file_path, $key, $value) = @_;
+
+    my $ref = csv(
+        in => $file_path,
+        key => $key,
+        value => $value
+    );
+
+    return $ref;
 }
 
 1;
