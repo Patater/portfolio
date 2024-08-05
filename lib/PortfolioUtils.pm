@@ -12,7 +12,8 @@ use List::Util qw(sum);
 use Text::CSV qw(csv);
 use Exporter qw(import);
 
-our @EXPORT_OK = qw(print_adjustments print_portfolio read_csv);
+our @EXPORT_OK =
+  qw(print_adjustments print_comparison print_portfolio read_csv);
 
 # Print the buy/sell adjustments
 sub print_adjustments {
@@ -37,6 +38,29 @@ sub print_portfolio {
 
         if ($target_allocation && exists $target_allocation->{$fund}) {
             printf " vs %.2f%%", $target_allocation->{$fund} * 100;
+        }
+
+        print ")\n";
+    }
+}
+
+# Print a comparison of allocation between two the provided portfolios)
+sub print_comparison {
+    my ($portfolio_a, $portfolio_b, $target_allocation) = @_;
+    my $total_value_a = sum values %$portfolio_a;
+    my $total_value_b = sum values %$portfolio_b;
+
+    for my $fund (sort keys %$portfolio_a) {
+        my $value_a = $portfolio_a->{$fund};
+        my $percentage_a = ($value_a / $total_value_a) * 100;
+        my $value_b = $portfolio_b->{$fund};
+        my $percentage_b = ($value_b / $total_value_b) * 100;
+
+        printf "%s: %.2f => %.2f ", $fund, $value_a, $value_b;
+        printf "(%.2f%% => %.2f%%", $percentage_a, $percentage_b;
+
+        if ($target_allocation && exists $target_allocation->{$fund}) {
+            printf " [%.2f%%]", $target_allocation->{$fund} * 100;
         }
 
         print ")\n";
