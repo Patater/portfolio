@@ -17,7 +17,7 @@ use PortfolioUtils
 # without selling any existing investments. The intention is to use this
 # monthly to determine how best to use the any new monthly investment funds.
 sub allocate_funds {
-    my ($target_allocation, $portfolio, $monthly_investment) = @_;
+    my ($target_allocation, $portfolio, $cash, $monthly_investment) = @_;
 
     # Calculate the total value of the portfolio.
     my $total_value = sum values %$portfolio;
@@ -34,6 +34,16 @@ sub allocate_funds {
       map { $_ => $target_allocation->{$_} - ($current_allocation{$_} // 0) }
       keys %$target_allocation;
 
+    # Determine which cash funds are over represented.
+    my %cash_over =
+      map { $_ => $deviation{$_} } grep { $deviation{$_} < 0 } keys %$cash;
+
+    # Sell any excess cash and add it to the available investment pool
+    my %adjustments =
+      map { $_ => $deviation{$_} * $new_total } keys %cash_over;
+    my $cash_avail = abs(sum values %adjustments // 0);
+    my $investment = $monthly_investment + $cash_avail;
+
     # Determine which funds are underrepresented.
     my %underrepresented = map { $_ => $deviation{$_} }
       grep { $deviation{$_} > 0 } keys %deviation;
@@ -44,8 +54,8 @@ sub allocate_funds {
     # don't become over represented.
     my $total_deviation = sum values %underrepresented;
     sub cap { $_[0] > $_[1] ? $_[1] : $_[0] }
-    my %adjustments = map {
-        $_ => cap(($deviation{$_} / $total_deviation) * $monthly_investment,
+    @adjustments{keys %underrepresented} = map {
+        cap(($deviation{$_} / $total_deviation) * $investment,
             $deviation{$_} * $new_total)
     } keys %underrepresented;
 
@@ -70,13 +80,14 @@ sub main {
     }
 
     my $actual_portfolio = read_csv('holdings.csv', 'Symbol', 'Amount');
+    my $cash = read_csv('cash.csv', 'Symbol', 'IsCash?');
     my $monthly_investment = 10000;
 
     my $old_portfolio = {%$actual_portfolio};
 
     my ($updated_portfolio, $adjustments) =
       allocate_funds($target_allocation, $actual_portfolio,
-        $monthly_investment);
+        $cash, $monthly_investment);
 
     # Print buy amounts
     print_adjustments($adjustments);
