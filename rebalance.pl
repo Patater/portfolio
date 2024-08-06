@@ -11,38 +11,7 @@ use warnings;
 use lib 'lib';
 use List::Util qw(sum);
 use PortfolioUtils
-  qw(print_adjustments print_comparison print_portfolio read_csv);
-
-# Rebalance the portfolio to match the target allocation. When rebalancing,
-# selling is permitted to move closer to the target portfolio than buying alone
-# could accomplish.
-sub rebalance_portfolio {
-    my ($target_allocation, $portfolio, $monthly_investment) = @_;
-
-    # Calculate the total value of the portfolio.
-    my $total_value = sum values %$portfolio;
-
-    # Add the monthly investment to the total value.
-    $total_value += $monthly_investment;
-
-    # Calculate the target amounts for each fund.
-    my %target_values = map { $_ => $target_allocation->{$_} * $total_value }
-      keys %$target_allocation;
-
-    # Calculate the required buy/sell amounts for each fund to achieve the
-    # target allocations.
-    my %adjustments =
-      map { $_ => $target_values{$_} - ($portfolio->{$_} // 0) }
-      keys %$target_allocation;
-
-    # Execute the buy/sell operations.
-    my %rebalanced_portfolio = %$portfolio;
-    @rebalanced_portfolio{keys %adjustments} =
-      map { $rebalanced_portfolio{$_} + $adjustments{$_} }
-      keys %adjustments;
-
-    return (\%rebalanced_portfolio, \%adjustments);
-}
+  qw(print_adjustments print_comparison print_portfolio read_csv rebalance_portfolio);
 
 sub main {
     my $target_allocation = read_csv('target.csv', 'Symbol', 'Ratio');

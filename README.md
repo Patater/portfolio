@@ -33,3 +33,12 @@ exactly in line with your target portfolio.
    rebalancing) in `rebalance.pl`.
 1. Run the `rebalance.pl` script. It will let you know what assets to buy and
     sell in order to make your portfolio match your target portfolio.
+
+
+### Developer Testing
+
+To run the developer tests, run the following command.
+
+```sh
+prove -lr -j 4
+```
