@@ -1,0 +1,6 @@
+-l=79 # Wrap within 79 characters
+-i=4  # Use 4 spaces for indentation
+-pt=2 # Use spaces for parentheses
+-bt=2 # Use spaces within brackets
+-sbt=2 # Use spaces within square brackets
+--no-valign
