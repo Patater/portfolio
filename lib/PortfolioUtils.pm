@@ -139,7 +139,7 @@ sub allocate_funds {
     # Sell any excess cash and add it to the available investment pool
     my %adjustments =
       map { $_ => $deviation{$_} * $new_total } keys %cash_over;
-    my $cash_avail = abs(sum values %adjustments // 0);
+    my $cash_avail = sum(map { abs($_) } values %adjustments) // 0;
     my $investment = $monthly_investment + $cash_avail;
 
     # Determine which funds are underrepresented.

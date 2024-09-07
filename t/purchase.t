@@ -21,6 +21,8 @@ sub float_cmp {
 }
 
 my $target_allocation = {'Fund A' => 0.5, 'Fund B' => 0.3, 'Fund C' => 0.2};
+my $target_allocation_cash =
+  {'Fund A' => 0.48, 'Fund B' => 0.3, 'Fund C' => 0.2, 'Cash' => 0.02};
 
 subtest 'Investment plan is correct for normal allocation' => sub {
     my $actual_portfolio =
@@ -124,6 +126,79 @@ subtest 'Updated portfolio reflects investments' => sub {
         ),
         'Updated Fund C is sum of old portfolio and investment plan'
     );
+};
+
+subtest
+  'Investment plan with cash maintains balance for already balanced portfolio'
+  => sub {
+    my $actual_portfolio = {
+        'Fund A' => 48000,
+        'Fund B' => 30000,
+        'Fund C' => 20000,
+        'Cash' => 2000
+    };
+    my $cash = {'Cash' => 1};
+    my $monthly_investment = 10000;
+    my (undef, $investment_plan) =
+      allocate_funds($target_allocation_cash, $actual_portfolio,
+        $cash, $monthly_investment);
+
+    ok(float_cmp($investment_plan->{'Fund A'}, 4800),
+        'Correct investment in Fund A');
+    ok(float_cmp($investment_plan->{'Fund B'}, 3000),
+        'Correct investment in Fund B');
+    ok(float_cmp($investment_plan->{'Fund C'}, 2000),
+        'Correct investment in Fund C');
+    ok(float_cmp($investment_plan->{'Fund C'}, 2000),
+        'Correct investment in Cash');
+  };
+
+subtest
+  'Investment plan with cash achieves balance for cash heavy portfolio' =>
+  sub {
+    my $actual_portfolio = {
+        'Fund A' => 48000,
+        'Fund B' => 30000,
+        'Fund C' => 20000,
+        'Cash' => 8000
+    };
+    my $cash = {'Cash' => 1};
+    my $monthly_investment = 0;
+    my (undef, $investment_plan) =
+      allocate_funds($target_allocation_cash, $actual_portfolio,
+        $cash, $monthly_investment);
+
+    ok(float_cmp($investment_plan->{'Fund A'}, 2880),
+        'Correct investment in Fund A');
+    ok(float_cmp($investment_plan->{'Fund B'}, 1800),
+        'Correct investment in Fund B');
+    ok(float_cmp($investment_plan->{'Fund C'}, 1200),
+        'Correct investment in Fund C');
+    ok(float_cmp($investment_plan->{'Cash'}, -5880),
+        'Correct investment in Cash');
+  };
+
+subtest 'Investment plan with cash is correct for normal allocation' => sub {
+    my $actual_portfolio = {
+        'Fund A' => 50000,
+        'Fund B' => 27638,
+        'Fund C' => 8000.20,
+        'Cash' => 6502
+    };
+    my $cash = {'Cash' => 1};
+    my $monthly_investment = 2.56;
+    my (undef, $investment_plan) =
+      allocate_funds($target_allocation_cash, $actual_portfolio,
+        $cash, $monthly_investment);
+
+    ok(float_cmp($investment_plan->{'Fund A'} // 0, 0),
+        'No new investment in Fund A');
+    ok(float_cmp($investment_plan->{'Fund B'}, 2.16),
+        'Correct investment in Fund B');
+    ok(float_cmp($investment_plan->{'Fund C'}, 4659.55),
+        'Correct investment in Fund C');
+    ok(float_cmp($investment_plan->{'Cash'}, -4659.14),
+        'Correct investment in Cash');
 };
 
 done_testing();
